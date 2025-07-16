@@ -1,8 +1,27 @@
 import React, { useRef, useState } from 'react';
 import { SafeAreaView, Text, TextInput, TouchableOpacity, ActivityIndicator, StyleSheet, Image, View, ScrollView, Pressable } from 'react-native';
 import Typewriter from 'react-native-typewriter';
-import axios from 'axios'; // Import Axios
 import ContentCard from '../ContentCard/ContentCard';
+
+// Mock data to replace API calls
+const mockVideoIdeas = {
+  videoidea1: {
+    name: 'videoidea1',
+    data: "Title: 'Good Behavior Clothing: Try on haul' Description: Spreading good vibes with Good Behavior! 🛍️😄 Perfect for fashion review content with sustainable clothing made from retired fishing boat sails."
+  },
+  videoidea2: {
+    name: 'videoidea2', 
+    data: "Title: 'Good Behavior Clothing: Stress Test' Description: Testing the durability and style of Good Behavior clothing in real-world scenarios. Great for lifestyle and fashion content."
+  },
+  barbieIdea1: {
+    name: 'barbieIdea1',
+    data: "Title: 'Barbie Movie Makeup: Pink glam makeup tutorial' Description: Transform into a real-life Barbie with this pink glam makeup tutorial. Perfect for beauty and lifestyle content."
+  },
+  barbieIdea2: {
+    name: 'barbieIdea2',
+    data: "Title: 'Barbie Movie Roll: Trends and Tips' Description: Explore the latest Barbie-inspired trends and styling tips for the ultimate pink aesthetic."
+  }
+};
 
 export default function Recommender({ handleShow, checkProductIcon, setCheckProductIcon, handleChangeUser, userNames }) {
   const [handle, setHandle] = useState('');
@@ -10,7 +29,7 @@ export default function Recommender({ handleShow, checkProductIcon, setCheckProd
   const [blurb, setBlurb] = useState('');
   const [blurb2, setBlurb2] = useState('');
   const [typedMessages, setTypedMessages] = useState([]);
-  const [animationsCompleted, setAnimationsCompleted] = useState(false); // New state for tracking animations completion
+  const [animationsCompleted, setAnimationsCompleted] = useState(false);
 
   const messages = [
     "Analyzing your followers' taste...",
@@ -29,33 +48,25 @@ export default function Recommender({ handleShow, checkProductIcon, setCheckProd
     setApiBlurb('');
     setApiBlurb2('');
 
-
     if (!Object.keys(userNames).includes(handle)) {
       setBlurb("Please put in a valid account.");
       setLoading(false);
       return;
     }
 
-    axios.get(`https://vlogmi-f37db73e2a60.herokuapp.com/api/v1/instagram/all`)
-      .then(response => {
-        // Assuming response.data contains the array of data
-        const allData = response.data.result;
-        // Filter to find the data for "videoidea1" and "videoidea2"
-        const videoIdea1Data = allData.find(item => item.name === 'videoidea1');
-        const videoIdea2Data = allData.find(item => item.name === 'videoidea2');
-
-        setApiBlurb(videoIdea1Data.data);
-        setApiBlurb2(videoIdea2Data.data);
-
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        setLoading(false);
-      });
-
-
-    setAnimationsCompleted(false)
-
+    // Simulate API delay
+    setTimeout(() => {
+      // Use mock data based on product icon state
+      if (checkProductIcon) {
+        setApiBlurb(mockVideoIdeas.videoidea1.data);
+        setApiBlurb2(mockVideoIdeas.videoidea2.data);
+      } else {
+        setApiBlurb(mockVideoIdeas.barbieIdea1.data);
+        setApiBlurb2(mockVideoIdeas.barbieIdea2.data);
+      }
+      
+      setAnimationsCompleted(false);
+    }, 1000);
   };
 
   const onTypingEnd = () => {
@@ -66,30 +77,21 @@ export default function Recommender({ handleShow, checkProductIcon, setCheckProd
       setLoading(false);
       setAnimationsCompleted(true);
       setTypedMessages([]);
-      handleShow && handleShow()
-      // setBlurb(apiBlurb || `It's recommended to focus on lifestyle content with a blend of travel and fashion. Engaging with followers through stories and regular posts about daily activities would be beneficial.`);
+      handleShow && handleShow();
     }
   };
 
-
-
   const parseContent = (contentString) => {
-    const titleMatch = contentString.match(/Title: '([^']+)'/); // Capture any character between ' and ' after Title:
-    // Look for "Description: " and capture everything after it
+    const titleMatch = contentString.match(/Title: '([^']+)'/);
     const descriptionMatch = contentString.match(/Description: (.*)/);
-    console.log(descriptionMatch)
+    
     return {
       title: titleMatch ? titleMatch[1].trim() : '',
-      // If descriptionMatch is found, return everything after "Description: "
-      // otherwise, return an empty string
       description: descriptionMatch ? descriptionMatch[1].trim() : '',
     };
   };
 
-
-
   const renderContent = () => {
-    // Assume apiBlurb is the string you got from the API
     if (apiBlurb) {
       const { title, description } = parseContent(apiBlurb);
       return (
@@ -104,7 +106,6 @@ export default function Recommender({ handleShow, checkProductIcon, setCheckProd
   };
 
   const renderContent2 = () => {
-    // Assume apiBlurb is the string you got from the API
     if (apiBlurb2) {
       const { title, description } = parseContent(apiBlurb2);
       return (
@@ -120,20 +121,23 @@ export default function Recommender({ handleShow, checkProductIcon, setCheckProd
 
   const actionSheetRef = useRef(null);
 
-
   return (
     <SafeAreaView style={styles.container}>
       <Image
         style={{
-          width: 300, marginTop: 20,
-          resizeMode: 'contain',
+          width: 300, 
           marginTop: 20,
+          resizeMode: 'contain',
         }}
-        source={require('../../assets/logo-2.png')} // Replace with your local logo image path
+        source={require('../../assets/logo-2.png')}
       />
       <View style={{
-        display: 'flex', flexDirection: 'row', alignItems: 'center',
-        width: '80%', gap: 8, marginBottom: 20
+        display: 'flex', 
+        flexDirection: 'row', 
+        alignItems: 'center',
+        width: '80%', 
+        gap: 8, 
+        marginBottom: 20
       }}>
         <TextInput
           style={{
@@ -142,23 +146,37 @@ export default function Recommender({ handleShow, checkProductIcon, setCheckProd
             borderWidth: 1,
             borderRadius: 25,
             paddingHorizontal: 20,
-            color: '#FFF', flex: 1
+            color: '#FFF', 
+            flex: 1
           }}
-          onChangeText={text => { setHandle(text), handleChangeUser(text) }}
+          onChangeText={text => { 
+            setHandle(text); 
+            handleChangeUser(text);
+          }}
           value={handle}
           placeholder="Enter Instagram Handle"
           placeholderTextColor="#999"
           autoCapitalize="none"
         />
         <TouchableOpacity onPress={() => setCheckProductIcon(s => !s)}>
-          <Image style={{ width: 40, height: 40 }}
+          <Image 
+            style={{ width: 40, height: 40 }}
             source={require('../../assets/icons/icon-1.png')}
           />
         </TouchableOpacity>
       </View>
+      
       {checkProductIcon && (
-        <Text style={{ width: '80%', color: "white", marginBottom: 20, textAlign: "center" }}>Good Behavior: A clothing/accessory brand made with the sails of retired fishing boats.</Text>
+        <Text style={{ 
+          width: '80%', 
+          color: "white", 
+          marginBottom: 20, 
+          textAlign: "center" 
+        }}>
+          Good Behavior: A clothing/accessory brand made with the sails of retired fishing boats.
+        </Text>
       )}
+      
       <TouchableOpacity style={styles.button} onPress={handleGenerate}>
         {loading ? (
           <ActivityIndicator size="small" color="#FFF" />
@@ -166,7 +184,9 @@ export default function Recommender({ handleShow, checkProductIcon, setCheckProd
           <Text style={styles.buttonText}>Let's go!</Text>
         )}
       </TouchableOpacity>
+      
       {blurb && <Text style={styles.blurbText}>{blurb}</Text>}
+      
       {!blurb && (
         <View>
           {typedMessages.map((msg, index) => (
@@ -229,40 +249,37 @@ const styles = StyleSheet.create({
   greetingText: {
     color: '#FFF',
     fontSize: 26,
-    fontWeight: '600', // slightly bolder
+    fontWeight: '600',
     marginBottom: 20,
-    // fontFamily: 'Helvetica', // a common built-in font
   },
-
   typingText: {
     color: '#FFF',
     textAlign: 'center',
     paddingHorizontal: 10,
     marginBottom: 10,
-    fontFamily: 'Arial', // another standard font
+    fontFamily: 'Arial',
     fontSize: 18,
-    fontStyle: 'italic', // adds a bit of flair
+    fontStyle: 'italic',
   },
-
   blurbContainer: {
-    backgroundColor: '#1c1c1e', // A slightly lighter dark background to contrast with the overall dark theme
+    backgroundColor: '#1c1c1e',
     borderRadius: 20,
     padding: 20,
     marginTop: 10,
-    shadowColor: '#FFF', // White color for the shadow to be subtle
+    shadowColor: '#FFF',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25,
     shadowRadius: 5,
-    elevation: 10, // for Android
+    elevation: 10,
     borderWidth: 1,
-    borderColor: '#E1306C', // Using the app's accent color for the border
+    borderColor: '#E1306C',
   },
   blurbText: {
     color: '#FFF',
     textAlign: 'center',
-    fontFamily: 'Arial', // You can choose any font that suits your design
+    fontFamily: 'Arial',
     fontSize: 18,
-    fontWeight: '400', // Normal weight to keep it clean and professional
-    marginBottom: 10, // Adds some space below the text if needed
+    fontWeight: '400',
+    marginBottom: 10,
   },
 });
