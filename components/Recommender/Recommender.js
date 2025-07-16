@@ -186,6 +186,7 @@ export default function Recommender({ handleShow, checkProductIcon, setCheckProd
       </TouchableOpacity>
       
       {blurb && <Text style={styles.blurbText}>{blurb}</Text>}
+      }
       
       {!blurb && (
         <View>
